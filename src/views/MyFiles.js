@@ -1,15 +1,17 @@
 import MediaTable from '../components/MediaTable';
 import {Typography} from '@mui/material';
+import BackButton from '../components/BackButton';
 
-const Home = () => {
+const MyFiles = () => {
   return (
     <>
+      <BackButton />
       <Typography component="h1" variant="h2">
-        Home
+        MyFiles
       </Typography>
-      <MediaTable />
+      <MediaTable allFiles={false} />
     </>
   );
 };
 
-export default Home;
+export default MyFiles;
