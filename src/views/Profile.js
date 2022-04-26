@@ -45,14 +45,14 @@ const Profile = () => {
           <CardContent>
             <List>
               <ListItem>
-                <ListItemAvatar sx={{width: '100%'}}>
+                <ListItemAvatar sx={{mx: 'auto', width: '100%'}}>
                   <Avatar
                     variant="square"
                     src={avatar.filename}
                     imgProps={{
                       alt: `${user.username}'s profile image`,
                     }}
-                    sx={{width: '100%', height: '30vh'}}
+                    sx={{mx: 'auto', width: '100%', height: '30vh'}}
                   />
                 </ListItemAvatar>
               </ListItem>
