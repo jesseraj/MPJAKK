@@ -8,7 +8,7 @@ const BackButton = () => {
     <Button
       startIcon={<ArrowBack />}
       onClick={() => {
-        navigate(-1);
+        navigate('/home');
       }}
     >
       Back

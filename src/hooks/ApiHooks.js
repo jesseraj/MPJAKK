@@ -17,26 +17,18 @@ const fetchJson = async (url, options = {}) => {
   }
 };
 
-const useMedia = (showAllFiles, userId) => {
-  const [update, setUpdate] = useState(false);
+const useMedia = () => {
   const [mediaArray, setMediaArray] = useState([]);
   const [loading, setLoading] = useState(false);
   const getMedia = async () => {
     try {
       setLoading(true);
-      let media = await useTag().getTag(appID);
-      // jos !showAllFiles, filteröi kirjautuneen
-      // käyttäjän tiedostot media taulukkoon
-      if (!showAllFiles) {
-        media = media.filter((file) => file.user_id === userId);
-      }
-
+      const media = await useTag().getTag(appID);
       const allFiles = await Promise.all(
         media.map(async (file) => {
           return await fetchJson(`${baseUrl}media/${file.file_id}`);
         })
       );
-
       setMediaArray(allFiles);
     } catch (err) {
       alert(err.message);
@@ -47,7 +39,7 @@ const useMedia = (showAllFiles, userId) => {
 
   useEffect(() => {
     getMedia();
-  }, [userId, update]);
+  }, []);
 
   const postMedia = async (formdata, token) => {
     try {
@@ -65,38 +57,7 @@ const useMedia = (showAllFiles, userId) => {
     }
   };
 
-  const deleteMedia = async (fileId, token) => {
-    try {
-      const fetchOptions = {
-        method: 'DELETE',
-        headers: {
-          'x-access-token': token,
-        },
-      };
-      return await fetchJson(baseUrl + 'media/' + fileId, fetchOptions);
-    } finally {
-      setUpdate(!update);
-    }
-  };
-
-  const putMedia = async (fileId, data, token) => {
-    try {
-      setLoading(true);
-      const fetchOptions = {
-        method: 'PUT',
-        headers: {
-          'x-access-token': token,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      };
-      return await fetchJson(baseUrl + 'media/' + fileId, fetchOptions);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return {mediaArray, postMedia, deleteMedia, putMedia, loading};
+  return {mediaArray, postMedia, loading};
 };
 
 const useUser = () => {
@@ -114,15 +75,6 @@ const useUser = () => {
     return checkUser.available;
   };
 
-  const getUserById = async (userId, token) => {
-    const fetchOptions = {
-      headers: {
-        'x-access-token': token,
-      },
-    };
-    return await fetchJson(baseUrl + 'users/' + userId, fetchOptions);
-  };
-
   const postUser = async (inputs) => {
     const fetchOptions = {
       method: 'POST',
@@ -134,7 +86,7 @@ const useUser = () => {
     return await fetchJson(baseUrl + 'users', fetchOptions);
   };
 
-  return {getUser, postUser, getUsername, getUserById};
+  return {getUser, postUser, getUsername};
 };
 
 const useLogin = () => {
