@@ -1,28 +1,85 @@
+import {Button, ImageListItem, ImageListItemBar} from '@mui/material';
 import PropTypes from 'prop-types';
 import {Link} from 'react-router-dom';
 import {mediaUrl} from '../utils/variables';
+import {safeParseJson} from '../utils/functions';
 
-const MediaRow = ({file}) => {
+const MediaRow = ({file, userId, deleteMedia}) => {
+  const doDelete = () => {
+    const ok = confirm('Do juu delte?');
+    if (ok) {
+      try {
+        deleteMedia(file.file_id, localStorage.getItem('token'));
+      } catch (err) {
+        // console.log(err);
+      }
+    }
+  };
+
+  const {description, filters} = safeParseJson(file.description) || {
+    description: file.description,
+    filters: {
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      sepia: 0,
+    },
+  };
+
   return (
-    <tr>
-      <td>
-        <img src={mediaUrl + file.thumbnails.w160} alt={file.title} />
-      </td>
-      <td>
-        <h4>{file.title}</h4>
-        <p>{file.description}</p>
-      </td>
-      <td>
-        <Link to={'/single'} state={{file}}>
-          View
-        </Link>
-      </td>
-    </tr>
+    <ImageListItem key={file.file_id}>
+      <img
+        src={file.thumbnails ? mediaUrl + file.thumbnails.w320 : 'logo512.png'}
+        alt={file.title}
+        loading="lazy"
+        style={{
+          filter: `
+        brightness(${filters.brightness}%)
+        contrast(${filters.contrast}%)
+        saturate(${filters.saturation}%)
+        sepia(${filters.sepia}%)
+        `,
+        }}
+      />
+      <ImageListItemBar
+        actionIcon={
+          <>
+            <Button
+              variant="contained"
+              component={Link}
+              to={'/single'}
+              state={{file}}
+            >
+              View
+            </Button>
+            {userId === file.user_id && (
+              <>
+                <Button
+                  variant="contained"
+                  component={Link}
+                  to={'/modify'}
+                  state={{file}}
+                >
+                  Edit
+                </Button>
+                <Button variant="contained" onClick={doDelete}>
+                  Delete
+                </Button>
+              </>
+            )}
+          </>
+        }
+        title={file.title}
+        subtitle={description}
+      />
+    </ImageListItem>
   );
 };
 
 MediaRow.propTypes = {
   file: PropTypes.object,
+  userId: PropTypes.number,
+  deleteMedia: PropTypes.func,
 };
 
 export default MediaRow;

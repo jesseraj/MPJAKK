@@ -1,6 +1,6 @@
 // TODO: add necessary imports
 import {useEffect, useState} from 'react';
-import {baseUrl} from '../utils/variables';
+import {appID, baseUrl} from '../utils/variables';
 
 const fetchJson = async (url, options = {}) => {
   try {
@@ -17,27 +17,86 @@ const fetchJson = async (url, options = {}) => {
   }
 };
 
-const useMedia = () => {
+const useMedia = (showAllFiles, userId) => {
+  const [update, setUpdate] = useState(false);
   const [mediaArray, setMediaArray] = useState([]);
+  const [loading, setLoading] = useState(false);
   const getMedia = async () => {
     try {
-      const media = await fetchJson(baseUrl + 'media');
+      setLoading(true);
+      let media = await useTag().getTag(appID);
+      // jos !showAllFiles, filteröi kirjautuneen
+      // käyttäjän tiedostot media taulukkoon
+      if (!showAllFiles) {
+        media = media.filter((file) => file.user_id === userId);
+      }
+
       const allFiles = await Promise.all(
         media.map(async (file) => {
           return await fetchJson(`${baseUrl}media/${file.file_id}`);
         })
       );
+
       setMediaArray(allFiles);
     } catch (err) {
       alert(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     getMedia();
-  }, []);
+  }, [userId, update]);
 
-  return {mediaArray};
+  const postMedia = async (formdata, token) => {
+    try {
+      setLoading(true);
+      const fetchOptions = {
+        method: 'POST',
+        headers: {
+          'x-access-token': token,
+        },
+        body: formdata,
+      };
+      return await fetchJson(baseUrl + 'media', fetchOptions);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteMedia = async (fileId, token) => {
+    try {
+      const fetchOptions = {
+        method: 'DELETE',
+        headers: {
+          'x-access-token': token,
+        },
+      };
+      return await fetchJson(baseUrl + 'media/' + fileId, fetchOptions);
+    } finally {
+      setUpdate(!update);
+    }
+  };
+
+  const putMedia = async (fileId, data, token) => {
+    try {
+      setLoading(true);
+      const fetchOptions = {
+        method: 'PUT',
+        headers: {
+          'x-access-token': token,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      };
+      return await fetchJson(baseUrl + 'media/' + fileId, fetchOptions);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {mediaArray, postMedia, deleteMedia, putMedia, loading};
 };
 
 const useUser = () => {
@@ -52,11 +111,16 @@ const useUser = () => {
 
   const getUsername = async (username) => {
     const checkUser = await fetchJson(baseUrl + 'users/username/' + username);
-    if (checkUser.available) {
-      return true;
-    } else {
-      throw new Error('Username not available');
-    }
+    return checkUser.available;
+  };
+
+  const getUserById = async (userId, token) => {
+    const fetchOptions = {
+      headers: {
+        'x-access-token': token,
+      },
+    };
+    return await fetchJson(baseUrl + 'users/' + userId, fetchOptions);
   };
 
   const postUser = async (inputs) => {
@@ -70,7 +134,7 @@ const useUser = () => {
     return await fetchJson(baseUrl + 'users', fetchOptions);
   };
 
-  return {getUser, postUser, getUsername};
+  return {getUser, postUser, getUsername, getUserById};
 };
 
 const useLogin = () => {
@@ -96,7 +160,19 @@ const useTag = () => {
       throw new Error('No results');
     }
   };
-  return {getTag};
+
+  const postTag = async (data, token) => {
+    const fetchOptions = {
+      method: 'POST',
+      headers: {
+        'x-access-token': token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    };
+    return await fetchJson(baseUrl + 'tags', fetchOptions);
+  };
+  return {getTag, postTag};
 };
 
 export {useMedia, useLogin, useUser, useTag};
