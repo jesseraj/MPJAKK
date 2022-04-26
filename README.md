@@ -9,7 +9,7 @@ In the project directory, you can run:
 ### `npm start`
 
 Runs the app in the development mode.\
-Open [https://users.metropolia.fi/~jesseraj/MPJAKK/MPJKKbuildit/httpabuild](https://users.metropolia.fi/~jesseraj/MPJAKK/MPJKKbuildit/httpabuild) to view it in your browser.
+Open [https://users.metropolia.fi/~jesseraj/MPJAKK/MPJKKbuildit/httpbbuild](https://users.metropolia.fi/~jesseraj/MPJAKK/MPJKKbuildit/httpbbuild) to view it in your browser.
 
 The page will reload when you make changes.\
 You may also see any lint errors in the console.
